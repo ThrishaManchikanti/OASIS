@@ -1,0 +1,227 @@
+
+import java.util.Scanner;
+
+class User {
+    private String username;
+    private String password;
+    private String name;
+    private String email;
+
+    public User(String username, String password, String name, String email) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+}
+
+public class OnlineExaminationSystem {
+    private static User currentUser;
+    private static String[] questions = {
+            "1. What is the capital of France?",
+            "2. Who painted the Mona Lisa?",
+            "3. What is the square root of 64?",
+            "4. What is the largest planet in our solar system?",
+            "5. What is the chemical symbol for gold?"
+    };
+
+    private static String[] options = {
+            "A. London  B. Paris  C. Rome  D. Madrid",
+            "A. Michelangelo  B. Leonardo da Vinci  C. Pablo Picasso  D. Vincent van Gogh",
+            "A. 8  B. 6  C. 10  D. 4",
+            "A. Mars  B. Jupiter  C. Earth  D. Saturn",
+            "A. Ag  B. Go  C. Au  D. Gd"
+    };
+
+    private static char[] answers = {'B', 'B', 'B', 'B', 'C'};
+
+    private static int totalQuestions = questions.length;
+    private static int score = 0;
+
+    private static final int EXAM_DURATION_IN_MINUTES = 10; // Exam duration in minutes
+    private static final int SECONDS_PER_MINUTE = 60; // Number of seconds in a minute
+
+    public static void main(String[] args) {
+        System.out.println("Welcome to the Online Examination System!");
+
+        Scanner scanner = new Scanner(System.in);
+
+        boolean isLoggedIn = false;
+
+        while (!isLoggedIn) {
+            System.out.print("Enter your username: ");
+            String username = scanner.nextLine();
+            System.out.print("Enter your password: ");
+            String password = scanner.nextLine();
+
+            // Simulating user authentication
+            if (authenticateUser(username, password)) {
+                isLoggedIn = true;
+            } else {
+                System.out.println("Invalid username or password. Please try again.");
+            }
+        }
+
+        showMenu();
+
+        boolean isExamStarted = false;
+        boolean isProfileUpdated = false;
+        boolean isPasswordSelected = false;
+
+        while (isLoggedIn) {
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline character
+
+            switch (choice) {
+                case 1:
+                    if (isExamStarted) {
+                        System.out.println("Exam has already been started.");
+                    } else {
+                        startExam(scanner);
+                        isExamStarted = true;
+                    }
+                    break;
+                case 2:
+                    if (isProfileUpdated) {
+                        System.out.println("Profile has already been updated.");
+                    } else {
+                        updateProfile(scanner);
+                        isProfileUpdated = true;
+                    }
+                    break;
+                case 3:
+                    if (isPasswordSelected) {
+                        System.out.println("Password has already been selected.");
+                    } else {
+                        selectPassword(scanner);
+                        isPasswordSelected = true;
+                    }
+                    break;
+                case 4:
+                    isLoggedIn = false;
+                    currentUser = null;
+                    System.out.println("You have been logged out.");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please select a valid option.");
+            }
+
+            if (isExamStarted && isExamTimeUp()) {
+                submitExam();
+                isExamStarted = false;
+            }
+
+            if (!isLoggedIn) {
+                break;
+            }
+
+            showMenu();
+        }
+
+        System.out.println("Thank you for using the Online Examination System!");
+    }
+
+    private static boolean authenticateUser(String username, String password) {
+        // Simulating user authentication
+        User user = new User("john123", "password", "John Doe", "john.doe@example.com");
+
+        if (username.equals(user.getUsername()) && password.equals(user.getPassword())) {
+            currentUser = user;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static void showMenu() {
+        System.out.println("\nMain Menu:");
+        System.out.println("1. Start Exam");
+        System.out.println("2. Update Profile");
+        System.out.println("3. Select Password");
+        System.out.println("4. Logout");
+        System.out.print("Enter your choice: ");
+    }
+
+    private static void startExam(Scanner scanner) {
+        System.out.println("\nWelcome, " + currentUser.getName() + "! The exam will start now.");
+
+        long examEndTime = System.currentTimeMillis() + (EXAM_DURATION_IN_MINUTES * SECONDS_PER_MINUTE * 1000);
+
+        while (System.currentTimeMillis() < examEndTime) {
+            for (int i = 0; i < totalQuestions; i++) {
+                System.out.println("\n" + questions[i]);
+                System.out.println(options[i]);
+
+                System.out.print("Enter your answer (A, B, C, or D): ");
+                char userAnswer = Character.toUpperCase(scanner.nextLine().charAt(0));
+
+                if (userAnswer == answers[i]) {
+                    score++;
+                }
+            }
+
+            if (System.currentTimeMillis() >= examEndTime) {
+                break;
+            }
+        }
+
+        submitExam();
+    }
+
+    private static boolean isExamTimeUp() {
+        return System.currentTimeMillis() >= (EXAM_DURATION_IN_MINUTES * SECONDS_PER_MINUTE * 1000);
+    }
+
+    private static void submitExam() {
+        System.out.println("\nExam time is up. Submitting your answers...");
+
+        System.out.println("\nThank you for taking the exam, " + currentUser.getName() + "!");
+        System.out.println("Your score: " + score + " out of " + totalQuestions);
+
+        // Reset score for next exam
+        score = 0;
+    }
+
+    private static void updateProfile(Scanner scanner) {
+        System.out.println("\nUpdate Profile:");
+        System.out.print("Enter your name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter your email: ");
+        String email = scanner.nextLine();
+
+        currentUser = new User(currentUser.getUsername(), currentUser.getPassword(), name, email);
+
+        System.out.println("Profile updated successfully!");
+    }
+
+    private static void selectPassword(Scanner scanner) {
+        System.out.println("\nSelect Password:");
+        System.out.print("Enter your new password: ");
+        String newPassword = scanner.nextLine();
+        System.out.print("Confirm your new password: ");
+        String confirmNewPassword = scanner.nextLine();
+
+        if (newPassword.equals(confirmNewPassword)) {
+            currentUser = new User(currentUser.getUsername(), newPassword, currentUser.getName(), currentUser.getEmail());
+            System.out.println("Password selected successfully!");
+        } else {
+            System.out.println("Password confirmation failed. Please try again.");
+        }
+    }
+}
